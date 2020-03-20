@@ -8,13 +8,14 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./nvidia.nix
+      # ./nvidia.nix
     ];
 
   
   
   # Use the systemd-boot EFI boot loader.
   boot = {
+  	blacklistedKernelModules = ["nouveau" "nvidia" "nvidia_drm" "nvidia_uvm" "nvidia_modeset" ];
 	kernelPackages = pkgs.linuxPackages_latest;
 	kernelModules = [ "kvm-intel" ];
 	kernelParams = [ "acpi_rev_override=1" "zswap.enabled=1" "zswap.compressor=lz4" ];
@@ -47,7 +48,7 @@
   # Set your time zone.
   time.timeZone = "America/Toronto";
 
-  # List packages installed in system profile. To search, run:
+  # List packages installed in system profile. To searchnvidia, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     	wget 
@@ -120,9 +121,9 @@
 	thermald.enable = true;
 	printing.enable = true;
 	xserver = {
-		useGlamor = true;
+		# useGlamor = true;
 		enable = true;
-		videoDrivers = [ "modesetting" "nvidia" ];
+		videoDrivers = [ "intel" ];
 		libinput = {
 			enable = true;
 			tapping = true;
