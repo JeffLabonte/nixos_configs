@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./nvidia.nix
     ];
 
   
@@ -16,7 +17,7 @@
   boot = {
 	kernelPackages = pkgs.linuxPackages_latest;
 	kernelModules = [ "kvm-intel" ];
-	kernelParams = [ "acpi_rev_override=1" "pcie_pm_port=off" "zswap.enabled=1" "zswap.compressor=lz4" ];
+	kernelParams = [ "acpi_rev_override=1" "zswap.enabled=1" "zswap.compressor=lz4" ];
 	initrd = {
 		availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" "rtsx_pci_sdmmc" ];
 		kernelModules = [ "lz4" "lz4_compress" "nvme" "usb_storage" "xhci_pci" "ahci" "sd_mod" "rtsx_pci_sdmmc" ];
@@ -31,16 +32,16 @@
   nixpkgs = {
 	config = {
 		allowUnfree = true;
-		packageOverrides = pkgs: {
-			vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
-		};
+		#packageOverrides = pkgs: {
+		#	vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
+		#};
 	};
   };
 
-  i18n = {
-    consoleFont = "latarcyrheb-sun32";
-    consoleKeyMap = "us";
-    defaultLocale = "en_US.UTF-8";
+  console = {
+    font = "latarcyrheb-sun32";
+    keyMap = "us";
+    #defaultLocale = "en_US.UTF-8";
   };
 
   # Set your time zone.
@@ -97,20 +98,19 @@
 	opengl = {
 		enable = true;
 		driSupport = true;
-		extraPackages = with pkgs; [
-		     	vaapiIntel
-	           	vaapiVdpau
-	         	libvdpau-va-gl
-	       		intel-media-driver # only available starting nixos-19.03 or the current nixos-unstable
-		];
+		#extraPackages = with pkgs; [
+		#     	vaapiIntel
+	        #   	vaapiVdpau
+	        # 	libvdpau-va-gl
+	       	#	intel-media-driver # only available starting nixos-19.03 or the current nixos-unstable
+		#];
 	};
-	bumblebee.enable = true;
 	bluetooth = {
 		enable = true;
-		extraConfig = "
-		  [General]
-		  Enable=Source,Sink,Media,Socket
-		";
+		# extraConfig = "
+		#   [General]
+		#   Enable=Source,Sink,Media,Socket
+		# ";
 	};
   };
 
@@ -120,18 +120,19 @@
 	thermald.enable = true;
 	printing.enable = true;
 	xserver = {
+		useGlamor = true;
 		enable = true;
-		videoDrivers = [ "intel" ];
+		videoDrivers = [ "modesetting" "nvidia" ];
 		libinput = {
 			enable = true;
 			tapping = true;
 		};
 		displayManager = {
 			lightdm.enable = true;
+			defaultSession = "xfce";
 		};
 		desktopManager = {
-			xfce4-14.enable = true;
-			default = "xfce4-14";
+			xfce.enable = true;
 		};
 	
 	};
