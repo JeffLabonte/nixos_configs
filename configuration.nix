@@ -129,9 +129,14 @@
 		displayManager = {
 			lightdm.enable = true;
 		};
+		windowManager = {
+			awesome.enable = true;
+		};
 		desktopManager = {
-			xfce4-14.enable = true;
-			default = "xfce4-14";
+			default = "none";
+			xterm.enable = false;
+			#xfce4-14.enable = true;
+			#default = "xfce4-14";
 		};
 	
 	};
