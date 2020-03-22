@@ -14,6 +14,7 @@
   
   # Use the systemd-boot EFI boot loader.
   boot = {
+  	plymouth.enable = true;
 	kernelPackages = pkgs.linuxPackages_latest;
 	kernelModules = [ "kvm-intel" ];
 	kernelParams = [ "acpi_rev_override=1" "pcie_pm_port=off" "zswap.enabled=1" "zswap.compressor=lz4" ];
@@ -48,29 +49,52 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    	wget 
-    	vim
-	neovim
-	brave
-	neofetch
-	firefox
-	slack-dark
-	discord
-	jetbrains.pycharm-professional
-	vscodium
-	deja-dup
-	pass
-	xfce4-14.xfce4-xkb-plugin
-	xfce4-14.xfce4-pulseaudio-plugin
-  ];
+  environment = {
+  	systemPackages = with pkgs; [
+		alacritty
+		ansible
+		brave
+		chromium
+		cmake
+		deja-dup
+		discord
+		feh
+		firefox
+		gcc
+		ghc
+		i3lock
+		jetbrains.pycharm-professional
+		linuxPackages.cpupower
+		neofetch
+		networkmanagerapplet
+		neovim
+		pasystray
+		pass
+		playerctl
+		rofi
+		rofi-pass
+		slack-dark
+    		vim
+		vscodium
+    		wget 
+		xorg.xbacklight
+		xfce.xfce4-terminal
+		xfce4-14.xfce4-power-manager
+		xfce.xfce4-screenshooter
+		#xfce4-14.xfce4-xkb-plugin
+		#xfce4-14.xfce4-pulseaudio-plugin
+  	];
+	variables = {
+		EDITOR = "nvim";
+		TERMINAL = "xfce4-terminal";
+	};
+	
+  };
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
   programs = {
-	gnupg.agent = { enable = true; enableSSHSupport = true; };
 	dconf.enable = true;
+	gnupg.agent = { enable = true; enableSSHSupport = true; };
+	zsh.enable = true;
   };
 
   # List services that you want to enable:
@@ -124,6 +148,8 @@
 		videoDrivers = [ "intel" ];
 		libinput = {
 			enable = true;
+		
+		
 			tapping = true;
 		};
 		displayManager = {
