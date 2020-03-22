@@ -38,6 +38,14 @@
 	};
   };
 
+  nix = {
+  	autoOptimiseStore = true;
+  	gc = {
+		automatic = true;
+		dates = "12:00";
+	};
+  };
+
   i18n = {
     consoleFont = "latarcyrheb-sun32";
     consoleKeyMap = "us";
