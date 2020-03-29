@@ -10,19 +10,19 @@
 
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/119e44cc-311a-48f5-982a-662573ffa6c2";
+    { device = "/dev/disk/by-uuid/fb70d026-12d3-4a8e-a8ab-46484d057eff";
       fsType = "xfs";
     };
 
-  boot.initrd.luks.devices."cryptroot".device = "/dev/disk/by-uuid/004572cb-2a69-42c7-bd55-4c8952257da0";
+  boot.initrd.luks.devices."cryptroot".device = "/dev/disk/by-uuid/39d4536d-c8f3-46af-b171-8f9aed7cca94";
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/53F0-99CA";
+    { device = "/dev/disk/by-uuid/7F50-0614";
       fsType = "vfat";
     };
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/547b692b-9f30-4114-a389-3571463a3e0d"; }
+    [ { device = "/dev/disk/by-uuid/0989ac86-8f7a-4b68-b7ed-6890987920ad"; }
     ];
 
   nix.maxJobs = lib.mkDefault 8;

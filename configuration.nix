@@ -3,19 +3,19 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
-{
+let
+	unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
 
   
-  
   # Use the systemd-boot EFI boot loader.
   boot = {
   	plymouth.enable = true;
-	kernelPackages = pkgs.linuxPackages_latest;
+	kernelPackages = unstable.linuxPackages_latest;
 	kernelModules = [ "kvm-intel" ];
 	kernelParams = [ "acpi_rev_override=1" "pcie_pm_port=off" "zswap.enabled=1" "zswap.compressor=lz4" ];
 	initrd = {
@@ -31,10 +31,11 @@
 
   nixpkgs = {
 	config = {
-		allowUnfree = true;
-		packageOverrides = pkgs: {
-			vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
-		};
+	      allowUnfree = true;
+	      packageOverrides = pkgs: {
+			vaapiIntel = unstable.vaapiIntel.override { enableHybridCodec = true; };
+			virtualbox = unstable.virtualbox;
+	      };
 	};
   };
 
@@ -44,6 +45,8 @@
 		automatic = true;
 		dates = "12:00";
 	};
+	binaryCaches = [ "https://hydra.iohk.io" "https://iohk.cachix.org" ];
+	binaryCachePublicKeys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo=" ];
   };
 
   i18n = {
@@ -59,42 +62,29 @@
   # $ nix search wget
   environment = {
   	systemPackages = with pkgs; [
-		alacritty
-		ansible
-		brave
-		chromium
 		cmake
 		deja-dup
-		discord
-		feh
 		firefox
 		gcc
 		ghc
-		i3lock
-		jetbrains.pycharm-professional
+		gnome3.gedit
 		linuxPackages.cpupower
-		neofetch
 		networkmanagerapplet
-		neovim
-		pasystray
 		pass
-		playerctl
-		rofi
-		rofi-pass
-		slack-dark
+		python37
     		vim
-		vscodium
     		wget 
-		xorg.xbacklight
+		xfce4-14.thunar
 		xfce.xfce4-terminal
 		xfce4-14.xfce4-power-manager
 		xfce.xfce4-screenshooter
-		#xfce4-14.xfce4-xkb-plugin
-		#xfce4-14.xfce4-pulseaudio-plugin
+		xfce4-14.xfce4-xkb-plugin
+		xfce4-14.xfce4-pulseaudio-plugin
+		xsel
   	];
 	variables = {
 		EDITOR = "nvim";
-		TERMINAL = "xfce4-terminal";
+		TERMINAL = "alacritty";
 	};
 	
   };
@@ -105,11 +95,8 @@
 	zsh.enable = true;
   };
 
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  
   networking = {
+  	enableIPv6 = false;
   	networkmanager.enable = true;
 	hostName = "tuxbox-xps15";
   	firewall = {
@@ -129,7 +116,7 @@
 	opengl = {
 		enable = true;
 		driSupport = true;
-		extraPackages = with pkgs; [
+		extraPackages = with unstable; [
 		     	vaapiIntel
 	           	vaapiVdpau
 	         	libvdpau-va-gl
@@ -156,27 +143,21 @@
 		videoDrivers = [ "intel" ];
 		libinput = {
 			enable = true;
-		
-		
 			tapping = true;
 		};
 		displayManager = {
 			lightdm.enable = true;
 		};
-		windowManager = {
-			awesome.enable = true;
-		};
 		desktopManager = {
-			default = "none";
 			xterm.enable = false;
-			#xfce4-14.enable = true;
-			#default = "xfce4-14";
+			xfce4-14.enable = true;
+			default = "xfce4-14";
 		};
 	
 	};
 	dbus.packages = with pkgs; [ gnome2.GConf ];
   };
-  
+
   virtualisation = {
 	docker.enable = true;
 	virtualbox.host = { 
@@ -206,6 +187,24 @@
 	 "video"
 	 "networkmanager"
  	]; 
+    packages = with unstable; [
+	ansible
+	brave
+	chromium
+	discord
+	gcc
+	ghc
+	gitkraken
+	jetbrains.pycharm-professional
+	neofetch
+	neovim
+	slack-dark
+	spotify
+	tdesktop
+	tmux
+	vscodium
+    	weechat
+    ];
   };
 
   # This value determines the NixOS release with which your system is to be
