@@ -5,14 +5,28 @@
 { config, pkgs, ... }:
 let
 	unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+  	nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
+	      export __NV_PRIME_RENDER_OFFLOAD=1
+              export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+	      export __GLX_VENDOR_LIBRARY_NAME=nvidia
+              export __VK_LAYER_NV_optimus=NVIDIA_only
+	      exec -a "$0" "$@"
+        '';
 in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      # <nixos-unstable/nixos/modules/hardware/video/nvidia.nix>
+      # <nixos-unstable/nixos/modules/services/x11/display-managers/gdm.nix>
     ];
 
+    #disabledModules = [ 
+    #	"hardware/video/nvidia.nix"
+    #    "services/x11/display-managers/gdm.nix"
+    #];
+
+
   
-  # Use the systemd-boot EFI boot loader.
   boot = {
   	plymouth.enable = true;
 	kernelPackages = unstable.linuxPackages_latest;
@@ -35,6 +49,8 @@ in {
 	      packageOverrides = pkgs: {
 			vaapiIntel = unstable.vaapiIntel.override { enableHybridCodec = true; };
 			virtualbox = unstable.virtualbox;
+			nvidia = unstable.nvidia;
+			xfce = unstable.xfce;
 	      };
 	};
   };
@@ -55,11 +71,8 @@ in {
     defaultLocale = "en_US.UTF-8";
   };
 
-  # Set your time zone.
   time.timeZone = "America/Toronto";
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment = {
   	systemPackages = with pkgs; [
 		cmake
@@ -124,6 +137,13 @@ in {
 		];
 	};
 	bumblebee.enable = true;
+	# nvidia.prime = {
+	# 	offload.enable = true;
+	# 	# Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
+	# 	intelBusId = "PCI:0:2:0";
+	# 	# Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
+	# 	nvidiaBusId = "PCI:1:0:0";
+	# };
 	bluetooth = {
 		enable = true;
 		extraConfig = "
@@ -188,22 +208,39 @@ in {
 	 "networkmanager"
  	]; 
     packages = with unstable; [
+    	acpi
+    	anydesk
 	ansible
 	brave
 	chromium
 	discord
 	gcc
 	ghc
+	gitAndTools.bump2version
 	gitkraken
+	glxinfo
 	jetbrains.pycharm-professional
+	kubectl
+	minikube
 	neofetch
 	neovim
+	postman
+	protonvpn-cli-ng
+	remmina
+	sublime3
 	slack-dark
 	spotify
+	stack
 	tdesktop
+	teams
+	tor-browser-bundle-bin
 	tmux
+	transmission-gtk
+	unzip
 	vscodium
     	weechat
+	xsel
+	zip
     ];
   };
 
