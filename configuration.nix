@@ -80,7 +80,10 @@ in {
 		firefox
 		gcc
 		ghc
+		gnome3.adwaita-icon-theme
 		gnome3.gedit
+		gvfs
+		evince
 		linuxPackages.cpupower
 		networkmanagerapplet
 		pass
@@ -90,14 +93,13 @@ in {
 		xfce4-14.thunar
 		xfce.xfce4-terminal
 		xfce4-14.xfce4-power-manager
-		xfce.xfce4-screenshooter
 		xfce4-14.xfce4-xkb-plugin
 		xfce4-14.xfce4-pulseaudio-plugin
 		xsel
   	];
 	variables = {
 		EDITOR = "nvim";
-		TERMINAL = "alacritty";
+		TERMINAL = "xfce4-terminal";
 	};
 	
   };
@@ -154,10 +156,11 @@ in {
   };
 
   services = {
-	blueman.enable = true;
+  	blueman.enable = true;
 	openssh.enable = true;
 	thermald.enable = true;
 	printing.enable = true;
+	flatpak.enable = true;
 	xserver = {
 		enable = true;
 		videoDrivers = [ "intel" ];
@@ -176,6 +179,10 @@ in {
 	
 	};
 	dbus.packages = with pkgs; [ gnome2.GConf ];
+  };
+  xdg.portal = {
+  	enable = true;
+  	extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
 
   virtualisation = {
@@ -233,7 +240,7 @@ in {
 	stack
 	tdesktop
 	teams
-	tor-browser-bundle-bin
+	pkgs.tor-browser-bundle-bin
 	tmux
 	transmission-gtk
 	unzip
