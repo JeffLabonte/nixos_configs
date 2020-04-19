@@ -85,8 +85,8 @@ in {
 		nvidia-offload
 		pass
 		python37
-    		vim
-    		wget 
+    	vim
+    	wget
 		# xfce.thunar
 		# xfce.xfce4-terminal
 		# xfce.xfce4-power-manager
@@ -96,9 +96,8 @@ in {
   	];
 	variables = {
 		EDITOR = "nvim";
-		TERMINAL = "gnome-terminal";
+		TERMINAL = "kitty";
 	};
-	
   };
 
   programs = {
@@ -117,7 +116,7 @@ in {
   		enable = false;
 	};
   };
-	
+
   sound.enable = true;
   hardware = {
 	pulseaudio = {
@@ -178,7 +177,7 @@ in {
 			xterm.enable = false;
 			gnome3.enable = true;
 		};
-	
+
 	};
 	dbus.packages = with pkgs; [ gnome2.GConf ];
   };
@@ -189,7 +188,7 @@ in {
 
   virtualisation = {
 	docker.enable = true;
-	# virtualbox.host = { 
+	# virtualbox.host = {
 	# 	enable = true;
 	# 	enableExtensionPack = true;
 	# };
@@ -207,7 +206,7 @@ in {
   users.users.jflabonte = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ 
+    extraGroups = [
 	 "wheel"
 	 "sudo"
 	 "docker"
@@ -215,7 +214,7 @@ in {
 	 "audio"
 	 "video"
 	 "networkmanager"
- 	]; 
+ 	];
     packages = with pkgs; [
     	acpi
     	anydesk
@@ -242,7 +241,7 @@ in {
 	stack
 	tdesktop
 	teams
-	tor-browser-bundle-bin
+	pkgs.tor-browser-bundle-bin
 	tmux
 	transmission-gtk
 	unzip
