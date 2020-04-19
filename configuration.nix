@@ -4,7 +4,7 @@
 
 { config, pkgs, ... }:
 let
-	unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+	#unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
   	nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
 	      export __NV_PRIME_RENDER_OFFLOAD=1
               export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
@@ -29,9 +29,9 @@ in {
   
   boot = {
   	plymouth.enable = true;
-	kernelPackages = unstable.linuxPackages_latest;
+	kernelPackages = pkgs.linuxPackages_latest;
 	kernelModules = [ "kvm-intel" ];
-	kernelParams = [ "acpi_rev_override=1" "pcie_pm_port=off" "zswap.enabled=1" "zswap.compressor=lz4" ];
+	kernelParams = [ "acpi_rev_override=1" "zswap.enabled=1" "zswap.compressor=lz4" ];
 	initrd = {
 		availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" "rtsx_pci_sdmmc" ];
 		kernelModules = [ "lz4" "lz4_compress" "nvme" "usb_storage" "xhci_pci" "ahci" "sd_mod" "rtsx_pci_sdmmc" ];
@@ -47,10 +47,7 @@ in {
 	config = {
 	      allowUnfree = true;
 	      packageOverrides = pkgs: {
-			vaapiIntel = unstable.vaapiIntel.override { enableHybridCodec = true; };
-			virtualbox = unstable.virtualbox;
-			nvidia = unstable.nvidia;
-			xfce = unstable.xfce;
+			vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
 	      };
 	};
   };
@@ -65,10 +62,9 @@ in {
 	binaryCachePublicKeys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo=" ];
   };
 
-  i18n = {
-    consoleFont = "latarcyrheb-sun32";
-    consoleKeyMap = "us";
-    defaultLocale = "en_US.UTF-8";
+  console = {
+    font = "latarcyrheb-sun32";
+    keyMap = "us";
   };
 
   time.timeZone = "America/Toronto";
@@ -80,24 +76,27 @@ in {
 		firefox
 		gcc
 		ghc
+		gnome3.adwaita-icon-theme
 		gnome3.gedit
+		gvfs
+		evince
 		linuxPackages.cpupower
 		networkmanagerapplet
+		nvidia-offload
 		pass
 		python37
     		vim
     		wget 
-		xfce4-14.thunar
-		xfce.xfce4-terminal
-		xfce4-14.xfce4-power-manager
-		xfce.xfce4-screenshooter
-		xfce4-14.xfce4-xkb-plugin
-		xfce4-14.xfce4-pulseaudio-plugin
+		# xfce.thunar
+		# xfce.xfce4-terminal
+		# xfce.xfce4-power-manager
+		# xfce.xfce4-xkb-plugin
+		# xfce.xfce4-pulseaudio-plugin
 		xsel
   	];
 	variables = {
 		EDITOR = "nvim";
-		TERMINAL = "alacritty";
+		TERMINAL = "gnome-terminal";
 	};
 	
   };
@@ -129,61 +128,71 @@ in {
 	opengl = {
 		enable = true;
 		driSupport = true;
-		extraPackages = with unstable; [
+		extraPackages = with pkgs; [
 		     	vaapiIntel
 	           	vaapiVdpau
 	         	libvdpau-va-gl
 	       		intel-media-driver # only available starting nixos-19.03 or the current nixos-unstable
 		];
 	};
-	bumblebee.enable = true;
-	# nvidia.prime = {
-	# 	offload.enable = true;
-	# 	# Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
-	# 	intelBusId = "PCI:0:2:0";
-	# 	# Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
-	# 	nvidiaBusId = "PCI:1:0:0";
-	# };
+	nvidia.prime = {
+		offload.enable = true;
+		# Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
+		intelBusId = "PCI:0:2:0";
+		# Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
+		nvidiaBusId = "PCI:1:0:0";
+	};
 	bluetooth = {
 		enable = true;
-		extraConfig = "
-		  [General]
-		  Enable=Source,Sink,Media,Socket
-		";
+		# extraConfig = "
+		#   [General]
+		#   Enable=Source,Sink,Media,Socket
+		# ";
 	};
   };
 
   services = {
-	blueman.enable = true;
+  	# blueman.enable = true;
 	openssh.enable = true;
 	thermald.enable = true;
 	printing.enable = true;
+	flatpak.enable = true;
+	tlp = {
+		enable = true;
+	};
 	xserver = {
 		enable = true;
-		videoDrivers = [ "intel" ];
+		videoDrivers = [ "nvidia" ];
 		libinput = {
 			enable = true;
 			tapping = true;
 		};
 		displayManager = {
-			lightdm.enable = true;
+			gdm = {
+				enable = true;
+				wayland = false;
+			};
+			# defaultSession = "gnome-xorg";
 		};
 		desktopManager = {
 			xterm.enable = false;
-			xfce4-14.enable = true;
-			default = "xfce4-14";
+			gnome3.enable = true;
 		};
 	
 	};
 	dbus.packages = with pkgs; [ gnome2.GConf ];
   };
+  xdg.portal = {
+  	enable = true;
+  	extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  };
 
   virtualisation = {
 	docker.enable = true;
-	virtualbox.host = { 
-		enable = true;
-		enableExtensionPack = true;
-	};
+	# virtualbox.host = { 
+	# 	enable = true;
+	# 	enableExtensionPack = true;
+	# };
   };
 
   security = {
@@ -207,7 +216,7 @@ in {
 	 "video"
 	 "networkmanager"
  	]; 
-    packages = with unstable; [
+    packages = with pkgs; [
     	acpi
     	anydesk
 	ansible
@@ -240,6 +249,7 @@ in {
 	vscodium
     	weechat
 	xsel
+	xscreensaver
 	zip
     ];
   };
