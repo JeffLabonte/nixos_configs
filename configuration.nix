@@ -84,9 +84,9 @@ in {
 		networkmanagerapplet
 		nvidia-offload
 		pass
-		python37
-    	vim
-    	wget
+		python38
+    		vim
+    		wget
 		# xfce.thunar
 		# xfce.xfce4-terminal
 		# xfce.xfce4-power-manager
@@ -222,6 +222,7 @@ in {
 	brave
 	chromium
 	discord
+	emacs
 	gcc
 	ghc
 	gitAndTools.bump2version
@@ -242,6 +243,7 @@ in {
 	tdesktop
 	teams
 	pkgs.tor-browser-bundle-bin
+	pkgs.lutris
 	tmux
 	transmission-gtk
 	unzip
@@ -257,7 +259,7 @@ in {
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "19.09"; # Did you read the comment?
+  system.stateVersion = "20.09"; # Did you read the comment?
 
 }
 
