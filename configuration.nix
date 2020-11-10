@@ -31,7 +31,7 @@ in {
   	plymouth.enable = true;
 	kernelPackages = pkgs.linuxPackages_latest;
 	kernelModules = [ "kvm-intel" ];
-	kernelParams = [ "acpi_rev_override=1" "zswap.enabled=1" "zswap.compressor=lz4" ];
+	kernelParams = [ "zswap.enabled=1" "zswap.compressor=lz4" ];
 	initrd = {
 		availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" "rtsx_pci_sdmmc" ];
 		kernelModules = [ "lz4" "lz4_compress" "nvme" "usb_storage" "xhci_pci" "ahci" "sd_mod" "rtsx_pci_sdmmc" ];
@@ -41,6 +41,13 @@ in {
 		efi.canTouchEfiVariables = true;
 	};
 	extraModulePackages = [ ];
+	extraModprobeConfig = ''
+		# Fix issue for Keycron keyboard mac mode 
+		options hid_apple fnmode=2 swap_opt_cmd=1
+		# Enable DynamicPwerManagement
+		# http://download.nvidia.com/XFree86/Linux-x86_64/440.31/README/dynamicpowermanagement.html
+		options nvidia NVreg_DynamicPowerManagement=0x02
+	'';
   };
 
   nixpkgs = {
@@ -81,10 +88,13 @@ in {
 		gvfs
 		evince
 		linuxPackages.cpupower
-		networkmanagerapplet
+		# networkmanagerapplet
 		nvidia-offload
 		pass
+		pciutils
+		powertop
 		python38
+		steam
     		vim
     		wget
 		# xfce.thunar
@@ -96,7 +106,6 @@ in {
   	];
 	variables = {
 		EDITOR = "nvim";
-		TERMINAL = "kitty";
 	};
   };
 
@@ -123,10 +132,13 @@ in {
 		enable = true;
 		extraModules = [ pkgs.pulseaudio-modules-bt ];
 		package = pkgs.pulseaudioFull;
+		support32Bit = true;
 	};
 	opengl = {
 		enable = true;
 		driSupport = true;
+		driSupport32Bit = true;
+		extraPackages32 = with pkgs.pkgsi686Linux; [ libva ];
 		extraPackages = with pkgs; [
 		     	vaapiIntel
 	           	vaapiVdpau
@@ -136,9 +148,7 @@ in {
 	};
 	nvidia.prime = {
 		offload.enable = true;
-		# Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
 		intelBusId = "PCI:0:2:0";
-		# Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
 		nvidiaBusId = "PCI:1:0:0";
 	};
 	bluetooth = {
@@ -161,7 +171,7 @@ in {
 	};
 	xserver = {
 		enable = true;
-		videoDrivers = [ "nvidia" ];
+		videoDrivers = [ "modeset" "nvidia" ];
 		libinput = {
 			enable = true;
 			tapping = true;
@@ -188,10 +198,6 @@ in {
 
   virtualisation = {
 	docker.enable = true;
-	# virtualbox.host = {
-	# 	enable = true;
-	# 	enableExtensionPack = true;
-	# };
   };
 
   security = {
@@ -216,17 +222,20 @@ in {
 	 "networkmanager"
  	];
     packages = with pkgs; [
+    	alacritty
     	acpi
     	anydesk
 	ansible
 	brave
 	chromium
 	discord
+	dropbox
 	emacs
 	gcc
 	ghc
+	git
+	git-lfs
 	gitAndTools.bump2version
-	gitkraken
 	glxinfo
 	jetbrains.pycharm-professional
 	kubectl
@@ -234,21 +243,22 @@ in {
 	neofetch
 	neovim
 	postman
-	protonvpn-cli-ng
+	protonvpn-gui
+	protonmail-bridge
 	remmina
+	signal-desktop
 	sublime3
 	slack-dark
 	spotify
 	stack
 	tdesktop
-	teams
-	pkgs.tor-browser-bundle-bin
-	pkgs.lutris
+	lutris
 	tmux
 	transmission-gtk
 	unzip
 	vscodium
     	weechat
+	wineStaging
 	xsel
 	xscreensaver
 	zip
