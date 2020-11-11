@@ -4,7 +4,7 @@
 
 { config, pkgs, ... }:
 let
-	#unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+	unstable = import <nixpkgs-unstable> { config = { allowUnfree = true; }; };
   	nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
 	      export __NV_PRIME_RENDER_OFFLOAD=1
               export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
@@ -31,7 +31,13 @@ in {
   	plymouth.enable = true;
 	kernelPackages = pkgs.linuxPackages_latest;
 	kernelModules = [ "kvm-intel" ];
-	kernelParams = [ "zswap.enabled=1" "zswap.compressor=lz4" ];
+	kernelParams = [ 
+		"zswap.enabled=1"
+		"zswap.compressor=lz4" 
+		"hid_apple.fnmode=2"
+		"hid_apple.swap_opt_cmd=1"
+		"nvidia.NVreg_DynamicPowerManagement=2"
+	];
 	initrd = {
 		availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" "rtsx_pci_sdmmc" ];
 		kernelModules = [ "lz4" "lz4_compress" "nvme" "usb_storage" "xhci_pci" "ahci" "sd_mod" "rtsx_pci_sdmmc" ];
@@ -41,13 +47,6 @@ in {
 		efi.canTouchEfiVariables = true;
 	};
 	extraModulePackages = [ ];
-	extraModprobeConfig = ''
-		# Fix issue for Keycron keyboard mac mode 
-		options hid_apple fnmode=2 swap_opt_cmd=1
-		# Enable DynamicPwerManagement
-		# http://download.nvidia.com/XFree86/Linux-x86_64/440.31/README/dynamicpowermanagement.html
-		options nvidia NVreg_DynamicPowerManagement=0x02
-	'';
   };
 
   nixpkgs = {
@@ -61,6 +60,7 @@ in {
 
   nix = {
   	autoOptimiseStore = true;
+	trustedUsers = [ "root" "jflabonte" ];
   	gc = {
 		automatic = true;
 		dates = "12:00";
@@ -95,6 +95,9 @@ in {
 		powertop
 		python38
 		steam
+		vulkan-tools
+		vulkan-loader
+		vulkan-headers
     		vim
     		wget
 		# xfce.thunar
@@ -138,7 +141,7 @@ in {
 		enable = true;
 		driSupport = true;
 		driSupport32Bit = true;
-		extraPackages32 = with pkgs.pkgsi686Linux; [ libva ];
+		extraPackages32 = with pkgs.pkgsi686Linux; [ libva vulkan-headers vulkan-loader ];
 		extraPackages = with pkgs; [
 		     	vaapiIntel
 	           	vaapiVdpau
@@ -146,10 +149,13 @@ in {
 	       		intel-media-driver # only available starting nixos-19.03 or the current nixos-unstable
 		];
 	};
-	nvidia.prime = {
-		offload.enable = true;
-		intelBusId = "PCI:0:2:0";
-		nvidiaBusId = "PCI:1:0:0";
+	nvidia = {
+		powerManagement.enable = true;
+		prime = {
+			offload.enable = true;
+			intelBusId = "PCI:0:2:0";
+			nvidiaBusId = "PCI:1:0:0";
+		};
 	};
 	bluetooth = {
 		enable = true;
@@ -226,7 +232,7 @@ in {
     	acpi
     	anydesk
 	ansible
-	brave
+	unstable.brave
 	chromium
 	discord
 	dropbox
@@ -252,13 +258,13 @@ in {
 	spotify
 	stack
 	tdesktop
-	lutris
+	unstable.lutris
 	tmux
 	transmission-gtk
 	unzip
 	vscodium
     	weechat
-	wineStaging
+	unstable.wineStaging
 	xsel
 	xscreensaver
 	zip
