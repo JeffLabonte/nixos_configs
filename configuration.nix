@@ -232,8 +232,11 @@ in {
     	acpi
     	anydesk
 	ansible
+	black
 	unstable.brave
 	chromium
+	cmake
+	docker-compose
 	discord
 	dropbox
 	emacs
@@ -243,7 +246,10 @@ in {
 	git-lfs
 	gitAndTools.bump2version
 	glxinfo
+	gnumake
+	unstable.insomnia
 	jetbrains.pycharm-professional
+	joplin-desktop
 	kubectl
 	minikube
 	neofetch
@@ -251,6 +257,7 @@ in {
 	postman
 	protonvpn-gui
 	protonmail-bridge
+	python38Packages.jedi
 	remmina
 	signal-desktop
 	sublime3
