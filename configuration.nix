@@ -238,7 +238,6 @@ in {
 	cmake
 	docker-compose
 	discord
-	dropbox
 	emacs
 	gcc
 	ghc
@@ -247,10 +246,12 @@ in {
 	gitAndTools.bump2version
 	glxinfo
 	gnumake
+	gnome3.gnome-tweak-tool
 	unstable.insomnia
 	jetbrains.pycharm-professional
-	joplin-desktop
+	unstable.joplin-desktop
 	kubectl
+	unstable.maestral-gui
 	minikube
 	neofetch
 	neovim
