@@ -16,8 +16,8 @@ in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      # <nixos-unstable/nixos/modules/hardware/video/nvidia.nix>
-      # <nixos-unstable/nixos/modules/services/x11/display-managers/gdm.nix>
+      ./bspwm.nix
+      # ./gnome3.nix
     ];
 
     #disabledModules = [ 
@@ -78,34 +78,43 @@ in {
 
   environment = {
   	systemPackages = with pkgs; [
+		brightnessctl
 		cmake
+		compton
 		deja-dup
+		evince
 		firefox
 		gcc
 		ghc
 		gnome3.adwaita-icon-theme
 		gnome3.gedit
 		gvfs
-		evince
+		i3lock-fancy
 		linuxPackages.cpupower
-		# networkmanagerapplet
+		networkmanagerapplet
 		nvidia-offload
 		pass
 		pciutils
+		playerctl
+		polybar
 		powertop
 		python38
+		rofi
 		steam
 		vulkan-tools
 		vulkan-loader
 		vulkan-headers
     		vim
     		wget
-		# xfce.thunar
+		wmctrl
+		xfce.thunar
 		# xfce.xfce4-terminal
 		# xfce.xfce4-power-manager
 		# xfce.xfce4-xkb-plugin
 		# xfce.xfce4-pulseaudio-plugin
 		xsel
+		xorg.xbacklight
+		xss-lock
   	];
 	variables = {
 		EDITOR = "nvim";
@@ -114,7 +123,10 @@ in {
 
   programs = {
 	dconf.enable = true;
-	gnupg.agent = { enable = true; enableSSHSupport = true; };
+	gnupg.agent = { 
+		enable = true;
+		enableSSHSupport = true;
+	};
 	zsh.enable = true;
   };
 
@@ -167,7 +179,6 @@ in {
   };
 
   services = {
-  	# blueman.enable = true;
 	openssh.enable = true;
 	thermald.enable = true;
 	printing.enable = true;
@@ -182,17 +193,6 @@ in {
 			enable = true;
 			tapping = true;
 		};
-		displayManager = {
-			gdm = {
-				enable = true;
-				wayland = false;
-			};
-			# defaultSession = "gnome-xorg";
-		};
-		desktopManager = {
-			xterm.enable = false;
-			gnome3.enable = true;
-		};
 
 	};
 	dbus.packages = with pkgs; [ gnome2.GConf ];
@@ -204,6 +204,7 @@ in {
 
   virtualisation = {
 	docker.enable = true;
+	libvirtd.enable = true;
   };
 
   security = {
@@ -247,24 +248,28 @@ in {
 	glxinfo
 	gnumake
 	gnome3.gnome-tweak-tool
+	gnome3.gnome-boxes
 	unstable.insomnia
 	jetbrains.pycharm-professional
 	unstable.joplin-desktop
 	kubectl
-	unstable.maestral-gui
 	minikube
+	ncurses
+	ncdu
 	neofetch
 	neovim
 	postman
 	protonvpn-gui
 	protonmail-bridge
 	python38Packages.jedi
+	python38Packages.cx_Freeze
 	remmina
 	signal-desktop
 	sublime3
 	slack-dark
 	spotify
 	stack
+	unstable.typora
 	tdesktop
 	unstable.lutris
 	tmux
