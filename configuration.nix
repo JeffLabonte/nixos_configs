@@ -16,17 +16,10 @@ in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./bspwm.nix
-      # ./gnome3.nix
     ];
 
-    #disabledModules = [ 
-    #	"hardware/video/nvidia.nix"
-    #    "services/x11/display-managers/gdm.nix"
-    #];
+  i18n.defaultLocale = "en_CA.UTF-8";
 
-
-  
   boot = {
   	plymouth.enable = true;
 	kernelPackages = pkgs.linuxPackages_latest;
@@ -41,6 +34,7 @@ in {
 	initrd = {
 		availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" "rtsx_pci_sdmmc" ];
 		kernelModules = [ "lz4" "lz4_compress" "nvme" "usb_storage" "xhci_pci" "ahci" "sd_mod" "rtsx_pci_sdmmc" ];
+		luks.devices."luks-286c7b51-a3c0-4613-93d4-2341619ac926".device = "/dev/disk/by-uuid/286c7b51-a3c0-4613-93d4-2341619ac926";
 	};
 	loader = {
 		systemd-boot.enable = true;
@@ -59,14 +53,13 @@ in {
   };
 
   nix = {
-  	autoOptimiseStore = true;
-	trustedUsers = [ "root" "jflabonte" ];
+  	settings = {
+		auto-optimise-store = true;
+	};
   	gc = {
 		automatic = true;
 		dates = "12:00";
 	};
-	binaryCaches = [ "https://hydra.iohk.io" "https://iohk.cachix.org" ];
-	binaryCachePublicKeys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo=" ];
   };
 
   console = {
@@ -78,43 +71,23 @@ in {
 
   environment = {
   	systemPackages = with pkgs; [
-		brightnessctl
 		cmake
-		compton
-		deja-dup
-		evince
 		firefox
 		gcc
-		ghc
 		gnome3.adwaita-icon-theme
-		gnome3.gedit
+		gnomeExtensions.appindicator
 		gvfs
-		i3lock-fancy
 		linuxPackages.cpupower
-		networkmanagerapplet
-		nvidia-offload
-		pass
 		pciutils
-		playerctl
-		polybar
 		powertop
-		python38
+		python311
 		rofi
-		steam
 		vulkan-tools
 		vulkan-loader
 		vulkan-headers
     		vim
     		wget
-		wmctrl
-		xfce.thunar
-		# xfce.xfce4-terminal
-		# xfce.xfce4-power-manager
-		# xfce.xfce4-xkb-plugin
-		# xfce.xfce4-pulseaudio-plugin
 		xsel
-		xorg.xbacklight
-		xss-lock
   	];
 	variables = {
 		EDITOR = "nvim";
@@ -128,6 +101,7 @@ in {
 		enableSSHSupport = true;
 	};
 	zsh.enable = true;
+	mosh.enable = true;
   };
 
   networking = {
@@ -145,9 +119,8 @@ in {
   hardware = {
 	pulseaudio = {
 		enable = true;
-		extraModules = [ pkgs.pulseaudio-modules-bt ];
-		package = pkgs.pulseaudioFull;
-		support32Bit = true;
+      		package = pkgs.pulseaudioFull;
+      		support32Bit = true;
 	};
 	opengl = {
 		enable = true;
@@ -164,10 +137,14 @@ in {
 	nvidia = {
 		powerManagement.enable = true;
 		prime = {
-			offload.enable = true;
+			offload = {
+				enable = true;
+				enableOffloadCmd = true;
+			};
 			intelBusId = "PCI:0:2:0";
 			nvidiaBusId = "PCI:1:0:0";
 		};
+		package = config.boot.kernelPackages.nvidiaPackages.production;
 	};
 	bluetooth = {
 		enable = true;
@@ -183,23 +160,24 @@ in {
 	thermald.enable = true;
 	printing.enable = true;
 	flatpak.enable = true;
-	tlp = {
-		enable = true;
-	};
+	tailscale.enable = true;
+	gnome.gnome-keyring.enable = true;
 	xserver = {
+		xkbOptions = "caps:swapescape";
+    		layout = "us";
+    		xkbVariant = "";
 		enable = true;
 		videoDrivers = [ "modeset" "nvidia" ];
 		libinput = {
 			enable = true;
-			tapping = true;
+			touchpad.tapping = true;
 		};
+  		displayManager.gdm.enable = true;
+  		desktopManager.gnome.enable = true;
 
 	};
+	udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 	dbus.packages = with pkgs; [ gnome2.GConf ];
-  };
-  xdg.portal = {
-  	enable = true;
-  	extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
 
   virtualisation = {
@@ -213,17 +191,18 @@ in {
 		  Defaults env_reset,pwfeedback
 		'';
 	};
+ 	rtkit.enable = true;
   };
 
 
   users.users.jflabonte = {
     isNormalUser = true;
     shell = pkgs.zsh;
+    description = "Jean-Francois Labonte";
     extraGroups = [
 	 "wheel"
 	 "sudo"
 	 "docker"
-	 "vboxusers"
 	 "audio"
 	 "video"
 	 "networkmanager"
@@ -231,64 +210,52 @@ in {
     packages = with pkgs; [
     	alacritty
     	acpi
-    	anydesk
 	ansible
+	bitwarden
 	black
 	unstable.brave
 	chromium
 	cmake
 	docker-compose
 	discord
-	emacs
+	fzf
 	gcc
-	ghc
 	git
-	git-lfs
-	gitAndTools.bump2version
 	glxinfo
 	gnumake
-	gnome3.gnome-tweak-tool
-	gnome3.gnome-boxes
-	unstable.insomnia
-	jetbrains.pycharm-professional
-	unstable.joplin-desktop
+	gnome.gnome-terminal
 	kubectl
 	minikube
 	ncurses
 	ncdu
 	neofetch
 	neovim
-	postman
+	# unstable.postman
 	protonvpn-gui
 	protonmail-bridge
-	python38Packages.jedi
-	python38Packages.cx_Freeze
+	python311Packages.jedi
 	remmina
 	signal-desktop
-	sublime3
 	slack-dark
-	spotify
 	stack
-	unstable.typora
+	starship
+	thefuck
 	tdesktop
-	unstable.lutris
 	tmux
 	transmission-gtk
 	unzip
-	vscodium
-    	weechat
-	unstable.wineStaging
+	vscode
 	xsel
-	xscreensaver
 	zip
     ];
   };
 
-  # This value determines the NixOS release with which your system is to be
-  # compatible, in order to avoid breaking some software such as database
-  # servers. You should change this only after NixOS release notes say you
-  # should.
-  system.stateVersion = "20.09"; # Did you read the comment?
+  # This value determines the NixOS release from which the default
+  # settings for stateful data, like file locations and database versions
+  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # this value at the release version of the first install of this system.
+  # Before changing this value read the documentation for this option
+  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  system.stateVersion = "23.11"; # Did you read the comment?
 
 }
-
