@@ -22,7 +22,7 @@ in {
 
   boot = {
   	plymouth.enable = true;
-	kernelPackages = pkgs.linuxPackages_latest;
+	kernelPackages = pkgs.linuxPackages;
 	kernelModules = [ "kvm-intel" ];
 	kernelParams = [ 
 		"zswap.enabled=1"
@@ -117,21 +117,17 @@ in {
 
   sound.enable = true;
   hardware = {
-	pulseaudio = {
-		enable = true;
-      		package = pkgs.pulseaudioFull;
-      		support32Bit = true;
-	};
+  	pulseaudio.enable = false;
 	opengl = {
 		enable = true;
 		driSupport = true;
 		driSupport32Bit = true;
-		extraPackages32 = with pkgs.pkgsi686Linux; [ libva vulkan-headers vulkan-loader ];
-		extraPackages = with pkgs; [
-		     	vaapiIntel
-	           	vaapiVdpau
-	         	libvdpau-va-gl
-	       		intel-media-driver # only available starting nixos-19.03 or the current nixos-unstable
+		extraPackages32 = with unstable.pkgsi686Linux; [ vaapiIntel libva vulkan-headers vulkan-loader ];
+		extraPackages = with unstable; [
+			intel-media-driver # LIBVA_DRIVER_NAME=iHD
+      			vaapiIntel         # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+      			vaapiVdpau
+      			libvdpau-va-gl
 		];
 	};
 	nvidia = {
@@ -148,10 +144,11 @@ in {
 	};
 	bluetooth = {
 		enable = true;
-		# extraConfig = "
-		#   [General]
-		#   Enable=Source,Sink,Media,Socket
-		# ";
+		settings = {
+			General = {
+				ControllerMode = "dual";
+			};
+		};
 	};
   };
 
@@ -178,6 +175,13 @@ in {
 	};
 	udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 	dbus.packages = with pkgs; [ gnome2.GConf ];
+	pipewire = {
+		enable = true;
+  		alsa.enable = true;
+  		alsa.support32Bit = true;
+  		pulse.enable = true;
+		wireplumber.enable = true;
+	};
   };
 
   virtualisation = {
@@ -208,22 +212,26 @@ in {
 	 "networkmanager"
  	];
     packages = with pkgs; [
+    	awscli2
     	alacritty
     	acpi
 	ansible
 	bitwarden
 	black
+	beekeeper-studio
 	unstable.brave
 	chromium
 	cmake
 	docker-compose
 	discord
 	fzf
+	go
 	gcc
 	git
 	glxinfo
 	gnumake
 	gnome.gnome-terminal
+	gnome.gnome-tweaks
 	kubectl
 	minikube
 	ncurses
@@ -231,10 +239,12 @@ in {
 	neofetch
 	neovim
 	# unstable.postman
-	protonvpn-gui
+	pass
+	unstable.protonvpn-gui
 	protonmail-bridge
 	python311Packages.jedi
 	remmina
+	ripgrep
 	signal-desktop
 	slack-dark
 	stack
@@ -244,7 +254,7 @@ in {
 	tmux
 	transmission-gtk
 	unzip
-	vscode
+	unstable.vscode
 	xsel
 	zip
     ];
